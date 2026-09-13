@@ -1,0 +1,436 @@
+<title>NeuroClips Field Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ink:        #f7f7f9;
+    --surface:    #ffffff;
+    --surface-2:  #f1f2f6;
+    --line:       #dfe1e9;
+    --text:       #14161d;
+    --muted:      #5f6675;
+    --amber:      #b07d0a;
+    --amber-soft: rgba(176, 125, 10, .12);
+    --live:       #167a4c;
+    --wait:       #9a5b12;
+    --off:        #6b7383;
+    --yt:         #2a6fd6;
+    --tt:         #c2501f;
+    --shadow:     0 1px 2px rgba(20, 22, 29, .06), 0 8px 24px rgba(20, 22, 29, .05);
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink:        #0e1016;
+      --surface:    #171a23;
+      --surface-2:  #1e2230;
+      --line:       #2a3040;
+      --text:       #e7e9f0;
+      --muted:      #8992a6;
+      --amber:      #f5c542;
+      --amber-soft: rgba(245, 197, 66, .13);
+      --live:       #5ddc9a;
+      --wait:       #f0a04b;
+      --off:        #6b7383;
+      --yt:         #5b9bf0;
+      --tt:         #e8703f;
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink:#0e1016; --surface:#171a23; --surface-2:#1e2230; --line:#2a3040;
+    --text:#e7e9f0; --muted:#8992a6; --amber:#f5c542; --amber-soft:rgba(245,197,66,.13);
+    --live:#5ddc9a; --wait:#f0a04b; --off:#6b7383; --yt:#5b9bf0; --tt:#e8703f;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  /* `display:flex` on .gate beats the UA sheet's [hidden] rule, so hiding it had
+     no effect. Do not rely on the host page supplying this reset. */
+  [hidden] { display: none !important; }
+  body {
+    margin: 0; background: var(--ink); color: var(--text);
+    font-family: var(--body); font-size: 16px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 18px 56px; }
+
+  /* ---- status stripe: the first thing worth knowing ---- */
+  .stripe {
+    display: flex; align-items: center; gap: 11px;
+    padding: 14px 18px; margin: 0 -18px 26px;
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 5;
+  }
+  .beacon { width: 9px; height: 9px; border-radius: 50%; flex: none; background: var(--off); }
+  .beacon.live { background: var(--live); box-shadow: 0 0 0 4px color-mix(in srgb, var(--live) 22%, transparent); }
+  .beacon.wait { background: var(--wait); }
+  @media (prefers-reduced-motion: no-preference) {
+    .beacon.live { animation: pulse 2.4s ease-in-out infinite; }
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+  .stripe .what { font-weight: 600; font-size: 14px; letter-spacing: -.01em;
+                  min-width: 0; overflow: hidden; text-overflow: ellipsis;
+                  white-space: nowrap; }
+  .stripe .when { color: var(--muted); font-family: var(--mono); font-size: 11.5px;
+                  margin-left: auto; flex: none; white-space: nowrap; }
+  .stripe .dates { display: block; font-family: var(--mono); font-size: 11px;
+                   font-weight: 400; color: var(--muted); letter-spacing: 0; }
+
+  h1 { font-family: var(--display); font-size: 15px; font-weight: 700;
+       letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+       margin: 0 0 4px; }
+  .channel { font-family: var(--mono); font-size: 12.5px; color: var(--muted); margin-bottom: 26px; }
+
+  /* ---- the headline figure ---- */
+  .hero { margin-bottom: 30px; }
+  .hero .n {
+    font-family: var(--display); font-weight: 800; font-size: clamp(58px, 20vw, 92px);
+    line-height: .88; letter-spacing: -.04em; font-variant-numeric: tabular-nums;
+    display: block;
+  }
+  .hero .cap { font-size: 13px; color: var(--muted); letter-spacing: .09em;
+               text-transform: uppercase; margin-top: 10px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .fig { }
+  .fig .n { font-family: var(--display); font-weight: 700; font-size: 30px;
+            letter-spacing: -.025em; font-variant-numeric: tabular-nums; display: block; }
+  .fig .cap { font-size: 11px; color: var(--muted); letter-spacing: .08em;
+              text-transform: uppercase; margin-top: 3px; }
+  .fig .n.est { color: var(--amber); }
+
+  h2 { font-family: var(--display); font-size: 11.5px; font-weight: 700;
+       letter-spacing: .15em; text-transform: uppercase; color: var(--muted);
+       margin: 34px 0 12px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 16px; box-shadow: var(--shadow);
+  }
+  .stack { display: flex; flex-direction: column; gap: 12px; }
+
+  /* platform rows carry a severity rail, not a uniform card chrome */
+  .plat { display: flex; align-items: flex-start; gap: 13px; }
+  .rail { width: 3px; align-self: stretch; border-radius: 2px; flex: none; }
+  .plat-body { flex: 1; min-width: 0; }
+  .plat-top { display: flex; align-items: baseline; gap: 8px; }
+  .plat-name { font-weight: 600; font-size: 15px; letter-spacing: -.01em; }
+  .plat-handle { font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+                 overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .plat-nums { display: flex; gap: 18px; margin-top: 10px; flex-wrap: wrap; }
+  .plat-nums div { font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+                   font-variant-numeric: tabular-nums; }
+  .plat-nums b { font-family: var(--display); font-size: 17px; color: var(--text);
+                 display: block; font-weight: 700; letter-spacing: -.02em; }
+  .why { font-size: 12.5px; color: var(--muted); margin-top: 11px; line-height: 1.45; }
+  .pill {
+    display: inline-block; font-family: var(--mono); font-size: 10px;
+    letter-spacing: .07em; text-transform: uppercase; padding: 2px 7px;
+    border-radius: 4px; background: var(--amber-soft); color: var(--amber);
+    vertical-align: 2px; margin-left: 6px;
+  }
+
+  /* pipeline: rendered -> waiting -> live */
+  .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 4px; }
+  .flow .step { text-align: center; }
+  .flow .step b { font-family: var(--display); font-size: 26px; font-weight: 700;
+                  display: block; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .flow .step span { font-size: 10.5px; color: var(--muted); letter-spacing: .07em;
+                     text-transform: uppercase; }
+  .flow .arrow { color: var(--line); font-size: 16px; }
+
+  ol.videos { list-style: none; margin: 0; padding: 0; counter-reset: v; }
+  ol.videos li {
+    display: flex; align-items: baseline; gap: 12px; padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  ol.videos li:last-child { border-bottom: 0; }
+  ol.videos .rank { font-family: var(--mono); font-size: 11px; color: var(--muted); flex: none; width: 18px; }
+  ol.videos .t { flex: 1; min-width: 0; font-size: 14px; line-height: 1.35; }
+  ol.videos .t a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--line); }
+  ol.videos .t a:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  ol.videos .v { font-family: var(--mono); font-size: 13px; flex: none;
+                 font-variant-numeric: tabular-nums; }
+
+  .note { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  .stale { border-left: 2px solid var(--wait); padding-left: 12px; }
+  footer { margin-top: 34px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .empty { color: var(--muted); font-size: 13.5px; padding: 6px 0; }
+
+  /* ---- password gate ---- */
+  .gate { min-height: 78vh; display: flex; align-items: center; justify-content: center;
+          padding: 24px; }
+  .gate form { width: 100%; max-width: 320px; }
+  .gate-h { font-family: var(--display); font-size: 15px; font-weight: 700;
+            letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+            margin: 0 0 8px; }
+  .gate-p { font-size: 14px; color: var(--muted); margin: 0 0 20px; line-height: 1.5; }
+  .gate input {
+    width: 100%; background: var(--surface); border: 1px solid var(--line);
+    color: var(--text); border-radius: 10px; padding: 13px 14px; font-size: 16px;
+    font-family: var(--body);
+  }
+  .gate input:focus { outline: 2px solid var(--amber); outline-offset: 2px;
+                      border-color: transparent; }
+  .gate-btn {
+    width: 100%; margin-top: 10px; padding: 13px; border: none; border-radius: 10px;
+    background: var(--amber); color: var(--ink); font-family: var(--body);
+    font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  .gate-btn:disabled { opacity: .6; cursor: progress; }
+  .gate-err { color: var(--wait); font-size: 13px; margin: 12px 0 0; }
+</style>
+
+<div class="gate" id="gate">
+  <form id="gateForm">
+    <h2 class="gate-h">NeuroClips</h2>
+    <p class="gate-p">This page is locked. Enter the password to see the numbers.</p>
+    <input type="password" id="gatePw" autocomplete="current-password"
+           placeholder="Password" aria-label="Password" autofocus>
+    <button type="submit" class="gate-btn">Unlock</button>
+    <p class="gate-err" id="gateErr" hidden></p>
+  </form>
+</div>
+
+<noscript>
+  <div class="gate">
+    <div>
+      <h2 class="gate-h">NeuroClips</h2>
+      <p class="gate-p">This page needs JavaScript to decrypt and display the
+        numbers. Open it in Safari or Chrome rather than an in-app browser.</p>
+    </div>
+  </div>
+</noscript>
+
+<div id="content" hidden>
+<div class="stripe">
+  <span class="beacon" id="beacon"></span>
+  <span class="what" id="windowText">Connecting&hellip;</span>
+  <span class="when" id="freshness"></span>
+</div>
+
+<div class="wrap">
+  <h1>NeuroClips</h1>
+  <div class="channel" id="channel">field monitor</div>
+
+  <div class="hero">
+    <span class="n" id="views">&mdash;</span>
+    <div class="cap">lifetime views</div>
+  </div>
+
+  <div class="grid2">
+    <div class="fig"><span class="n" id="confirmed">&mdash;</span><div class="cap">confirmed</div></div>
+    <div class="fig"><span class="n est" id="estimated">&mdash;</span><div class="cap">estimated</div></div>
+  </div>
+
+  <h2>Accounts</h2>
+  <div class="stack" id="platforms"></div>
+
+  <h2>Pipeline</h2>
+  <div class="card">
+    <div class="flow">
+      <div class="step"><b id="pRendered">&mdash;</b><span>rendered</span></div>
+      <div class="arrow">&rarr;</div>
+      <div class="step"><b id="pWaiting">&mdash;</b><span>waiting</span></div>
+      <div class="arrow">&rarr;</div>
+      <div class="step"><b id="pLive">&mdash;</b><span>live</span></div>
+    </div>
+  </div>
+
+  <h2>Best performing</h2>
+  <div class="card"><ol class="videos" id="videos"></ol></div>
+
+  <footer id="footer"></footer>
+</div>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  // Deliberately plain JavaScript. Optional chaining and nullish coalescing are
+  // a SYNTAX error on older mobile engines, and a syntax error anywhere in this
+  // block stops every line of it - which rendered the page completely blank.
+  function pick(obj, key, fallback) {
+    if (obj === null || obj === undefined) return fallback;
+    var value = obj[key];
+    return (value === null || value === undefined) ? fallback : value;
+  }
+  const nf = new Intl.NumberFormat();
+  const money = (n) => "$" + Number(n || 0).toFixed(2);
+
+  function ago(iso) {
+    if (!iso) return "never";
+    const secs = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (!isFinite(secs)) return "unknown";
+    if (secs < 90) return "just now";
+    if (secs < 5400) return Math.round(secs / 60) + " min ago";
+    if (secs < 172800) return Math.round(secs / 3600) + " h ago";
+    return Math.round(secs / 86400) + " days ago";
+  }
+
+  function render(d) {
+    var w = pick(d, "window", "");
+    const head = /^active/i.test(w) ? "Autopilot running"
+               : /^finished/i.test(w) ? "Trial finished"
+               : /not started/i.test(w) ? "Starts soon"
+               : /^paused/i.test(w) ? "Paused" : "Autopilot";
+    const left = /(\d+) day\(s\) left/.exec(w);
+    const dates = /(\d{4}-\d{2}-\d{2}) to (\d{4}-\d{2}-\d{2})/.exec(w);
+    $("windowText").innerHTML =
+      (left ? head + " \u00b7 " + left[1] + (left[1] === "1" ? " day" : " days") + " left"
+            : /LAST DAY/i.test(w) ? head + " \u00b7 last day" : head) +
+      (dates ? '<span class="dates">' + dates[1] + " to " + dates[2] + "</span>" : "");
+    const beacon = $("beacon");
+    beacon.className = "beacon " + (
+      /^active/i.test(w) ? "live" : /not started|paused/i.test(w) ? "wait" : "");
+
+    $("channel").textContent = (d.platforms || [])
+      .filter((p) => p.connected && p.handle)
+      .map((p) => p.handle).join("  &middot;  ") || "no account connected";
+
+    $("views").textContent = nf.format(pick(pick(d, "totals", {}), "views", 0));
+    $("confirmed").textContent = money(pick(pick(d, "totals", {}), "revenue_confirmed", 0));
+    var est = pick(pick(d, "totals", {}), "revenue_estimated", 0);
+    $("estimated").textContent = est ? money(est) : "\u2014";
+
+    const colours = { youtube: "var(--yt)", tiktok: "var(--tt)" };
+    $("platforms").innerHTML = (d.platforms || []).map((p) => {
+      if (!p.connected) {
+        return `<div class="card"><div class="plat">
+          <span class="rail" style="background:var(--off)"></span>
+          <div class="plat-body">
+            <div class="plat-top"><span class="plat-name">${p.platform}</span></div>
+            <div class="why">Not connected yet.</div>
+          </div></div></div>`;
+      }
+      const est = p.revenue_is_estimate ? '<span class="pill">estimate</span>' : "";
+      return `<div class="card"><div class="plat">
+        <span class="rail" style="background:${colours[p.platform] || "var(--off)"}"></span>
+        <div class="plat-body">
+          <div class="plat-top">
+            <span class="plat-name">${p.platform}</span>
+            <span class="plat-handle">${p.handle || ""}</span>
+          </div>
+          <div class="plat-nums">
+            <div><b>${nf.format(p.views)}</b>views</div>
+            <div><b>${nf.format(p.followers)}</b>subs</div>
+            <div><b>${nf.format(p.videos)}</b>videos</div>
+            <div><b>${money(p.revenue)}${est}</b>earned</div>
+          </div>
+          <div class="why">${p.revenue_source || ""}</div>
+        </div></div></div>`;
+    }).join("") || '<div class="card"><div class="empty">No accounts yet.</div></div>';
+
+    var produced = pick(pick(d, "produced", {}), "videos", 0);
+    var waiting = pick(pick(d, "pending", {}), "youtube", 0);
+    $("pRendered").textContent = nf.format(produced);
+    $("pWaiting").textContent = nf.format(waiting);
+    $("pLive").textContent = nf.format(Math.max(0, produced - waiting));
+
+    const vids = (d.top_videos || []).filter((v) => v.views > 0).slice(0, 8);
+    $("videos").innerHTML = vids.length ? vids.map((v, i) => `
+      <li>
+        <span class="rank">${String(i + 1).padStart(2, "0")}</span>
+        <span class="t">${v.url
+          ? `<a href="${v.url}" target="_blank" rel="noopener">${v.title}</a>`
+          : v.title}</span>
+        <span class="v">${nf.format(v.views)}</span>
+      </li>`).join("")
+      : '<div class="empty">Nothing has picked up views yet.</div>';
+
+    const age = ago(d.generated_at);
+    $("freshness").textContent = age;
+    const stale = /days|h ago/.test(age);
+    $("footer").innerHTML =
+      `<div class="note${stale ? " stale" : ""}">Snapshot taken ${age}. ` +
+      `This page shows the last reading pushed from the laptop, not live numbers &mdash; ` +
+      `open the dashboard on the machine itself for those.</div>`;
+  }
+
+  function offline(message) {
+    $("windowText").textContent = "No data yet";
+    $("beacon").className = "beacon";
+    $("footer").innerHTML = `<div class="note stale">${message}</div>`;
+  }
+
+  // The snapshot is baked into the page rather than read from a database, so it
+  // renders for anyone with the link - no Claude account, no sign-in. The cost is
+  // that refreshing it means republishing the page.
+  const PAYLOAD = {
+  "mode": "locked",
+  "salt": "0BCKU59sg0WC89QoYb2EJw==",
+  "iv": "0fugkOCv6rn6nqoV",
+  "ct": "fFAVHwbQFNOxUPwO48OIe9Ihz2UFb7N/JgXx5SOhmNIrRsOMsevNJFLLhM1U/JwgfEOUxFIcEyLT5C4J+oqHmH9w3QsEgEmKI4U/gjdoWYtocvnQ9I/dASpw/R5l025TsaeA61rpM3DYrlnk6qMuthEs//HpGZ0iPU2gRAz2WB2/aUCBtM+GVKJmSFSLRSIARmTu7kGa7kNCszsEnhNpXvwzSnUFXAZu0LFMCJPdOD6nMcADc+SCVeuCsCQnOYEimOBY0wm8VcqEopYa9uDYbBxk9nEmdQ5HShYP7jnclCaARDHjM3osbUpEdlW6oDucU/3LTQ5/jM3o0XCJ+y7Wk8yjv3UquBVnKWwLkWNmZxx2gVlwTcK6N1YTGOI3IHQjA6TkLKXz7Kv4JOZAcBAo1VrpS5F71X3AeacLiZqVBg2klxXC9GjrnPW7sSnj4WyoJ1wBEkWkZ7VaFgIRhlQXpBIuKHmWwX0JxKcJsPGMUt+HYyvUI79K1usCtepDUgAbR/j6HP72EIeNOxmS7zobJpcAezJUDUe2aXC8w9q7qsk/Bfd7TJZ3HlOC8rw+t5cG6hhBDTyjpXBl68DOtIyiCtYeLWGcelmBPB2e/uAz/nT0ZeJcb2osE3IhgL5x5psBEYSoawc1w5WlSFk3fYWQ27A+XIs54k2nwHhluNj7KOFet06MnQNegYV/kgG5dKxVBLbHhP7+m+V04JPNssiVgbSDjKvyM4bTMrSaTLghTEP7OA59b5VOi55d0IZvLFHq0Yf0V0Ic4GtGvYKD032hJxx2eVMqFIggIDsfoJFLGYS5Ujtoa5GnB806vqAWAJBt38ZiZl+uirvHiAGLs15QI846TajV0GRnsvp5MGeutmQXSx+l31WrZqm3pLha0+qIf3Nv/VKx3qD/0uXrDdMmr4hsUGlh4UAYiCAC47BD1EkAP5llE6Ax3kP/otg0suU+atkzSu9IWv3Of1Q1a7Git9GVuJheTuaruODrf9tbGhJOzkZNp8PGE1hHLWYud5aLEnxLmrAGcbGi3SJ1oEii436X704saz8o7eO8pWa1vBcBn1jrsBRuwVq5Vh2JWsLnDFayeyAwcTYd+W1HN/bYU4QaA6cWEC0K9ov6JRLGWIaTOQoQtBzP4Jr6hIY7O999rG1TZl3ZBcwdaki0GPveVjsV2z0jakqtTc01fGDlcPK4gyp1o1e0SHVjRTHVVc7PIYKFJLG0qIOCncspkG+3671to7WvXl0ep711hVW/R5F+W5nWgcw+X/DW071KaAYeW2ur2GmqoQ+E58whwxu6Jpb/08MwFzjpDx6uvg/kAXzcklJ6rRZisMSCt8BLC7eFym6a3cHStz9eESLGiEVGSoRbxDmiQ3Jzi5gmpkzY7Sz1cRcwMuNlcM46H7ghwm2wwaUqnOwtPTafWh38EvQQkbbyaWzuqvvX5FDBwOHC4Zfq1sCEUX/FY4nI65Gx6WRIrcCciTmqwdLeTPp+yFr23dRdZNN6r2rrkpy8AOpv6O+/yxYpauElMp5R+RX97e40+OIHqw2La97cLobiYZ9JMMYWY5MlEzmCMN7DoMQAbY0anu5WkdJTMH8mvUlQVeSe38rCQOMqP3O9Bj8Yo/0Bl6PdhhFq1LAzKd69DKo10CRKAmm3Gr9nM8H4/bTnmov5maYWUDYZul5gBYBL0RLFIur0GstTQuVXJvOphhQ00YVGoIyLfSpUnmS8HWXrQ5pZTAYxZMSklAfqlEaZq728Ikle/fGIRO315TlJnKGMKsszzwWeiWgdy9wvX+rPZRiH8y+stO0Vi6mllL0HStI/WY3TWOTiG2V0WmH4jjIy9ztmjJxAkY+TVBaKw5ONQQSDtKlBUzvr39oCboo6enrpN6+/NSHzI08qjzzXTL6kC7LXqG4PXbDtEgFaOtUmIfDnKurhTPus5B5gtnA3jwq8aPo4CVPQ+gtQooU4o0/4q++h07OSezkE4EBvRytwJZSAqhBPmHeDLSfz3aWhff3/BAFSdCdzQMgOEETqZ7RgCWhT9cUZIo64VRZ4NTEfKJmZwB5soz1gTlOyuFM35bNrENSjBhkH/wYLcp9UgoNXYppdHw7fIOZcoewrfSAF9ZnORcE+WUG1t/GX8RQnEPxsfIl138iYC4abF4fVAos8ohrbciqCA8C0cd28bLrWJ+nH/9AiJT6pxfCi3N/MB08w3QSWGvPWhXBYUnrmW7AeijZAPipab/XLp+VapNtREauU9WvMlJ37EBngocEZBRDcz6HsCtN0ffBEqE85zu1gDGnsj9/NLnQCdkK0npJjsU0H/tuQ2VM+sgcUSOX5ZiKikN5xDxfWjO56+uIj+qZEMR/uqUd2LjJ20PkJ6y6AbKk5BIFU9qYSZkimWLhDZLzUYl7V3oOV99t5jzUfm9Vzmyzk5lfz5pc18KpNo0+2NTsB6rhIN96mz9A6/kcdfP2FzPDec0KpiBRiSKEhYTC+j7BU0MZtwjFyx+1O8AXcJbvvqRLqrXiMFJXj/V1NDL6q5F39Ulvw3T8bXySYHCMXp3kdHDZP8z+5vyJKypHc9REGlhLhEjiiHpuvV8RoWcmoLJa0atjYwi+3BYIJdi0=",
+  "iterations": 250000
+};
+
+  function show(data) {
+    $("gate").hidden = true;
+    $("content").hidden = false;
+    render(data);
+  }
+
+  function b64(str) {
+    const bin = atob(str);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  async function unlock(password) {
+    // Must match the encrypting side exactly: PBKDF2-HMAC-SHA256 -> AES-256-GCM.
+    const enc = new TextEncoder();
+    const material = await crypto.subtle.importKey(
+      "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: b64(PAYLOAD.salt),
+        iterations: PAYLOAD.iterations || 250000, hash: "SHA-256" },
+      material, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    // A wrong password fails the GCM tag check, so there is nothing to compare
+    // against and no way to tell a near-miss from a wild guess.
+    const plain = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: b64(PAYLOAD.iv) }, key, b64(PAYLOAD.ct));
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  (function boot() {
+    if (!PAYLOAD || PAYLOAD.mode !== "locked") {
+      show(PAYLOAD && PAYLOAD.data ? PAYLOAD.data : PAYLOAD);
+      return;
+    }
+    const form = $("gateForm");
+    const field = $("gatePw");
+    const err = $("gateErr");
+    const button = form.querySelector(".gate-btn");
+
+    if (!window.crypto || !crypto.subtle) {
+      err.hidden = false;
+      err.textContent = "This browser cannot decrypt the page. Open it over https.";
+      return;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      err.hidden = true;
+      button.disabled = true;
+      button.textContent = "Unlocking\u2026";
+      try {
+        show(await unlock(field.value));
+      } catch (_) {
+        err.hidden = false;
+        err.textContent = "Wrong password.";
+        field.select();
+      } finally {
+        button.disabled = false;
+        button.textContent = "Unlock";
+      }
+    });
+    setTimeout(() => field.focus(), 50);
+  })();
+})();
+</script>
