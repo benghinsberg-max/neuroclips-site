@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeuroClips</title>
+<style>
+  :root { --ink:#16181d; --dim:#5b6270; --line:#e3e6ec; --bg:#fbfbfd; --link:#2a5bd7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink:#e8eaf0; --dim:#9aa2b1; --line:#2a2e38; --bg:#14161b; --link:#7ea3ff; }
+  }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:3rem 1.25rem 5rem; }
+  h1 { font-size:1.9rem; margin:0 0 .3rem; letter-spacing:-.02em; }
+  .sub { color:var(--dim); margin:0 0 2.5rem; }
+  h2 { font-size:1.05rem; margin:2.25rem 0 .6rem; }
+  a { color:var(--link); }
+  ul { padding-left:1.1rem; }
+  li { margin:.3rem 0; }
+  footer { margin-top:3rem; padding-top:1.25rem; border-top:1px solid var(--line);
+           color:var(--dim); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>NeuroClips</h1>
+  <p class="sub">A personal tool that writes, narrates and uploads short videos
+     to its owner&rsquo;s own YouTube channel.</p>
+
+  <h2>What it does</h2>
+  <p>NeuroClips is a self-hosted script. It drafts a short script, narrates it
+     with a text-to-speech voice, assembles the result into a vertical video with
+     captions, and uploads it to a single YouTube channel &mdash; the channel
+     belonging to the person running it.</p>
+
+  <h2>Who it is for</h2>
+  <p>One person: its operator. It is not a service, it has no users to sign up,
+     no accounts, and no interface other than a command line on the owner&rsquo;s
+     own computer.</p>
+
+  <h2>What it accesses</h2>
+  <ul>
+    <li>Permission to upload videos to the operator&rsquo;s YouTube channel</li>
+    <li>Read access to that channel&rsquo;s own view and revenue statistics, so
+        the operator can see how the videos performed</li>
+  </ul>
+  <p>It reads no one else&rsquo;s data and has no access to any other account.</p>
+
+  <h2>Documents</h2>
+  <ul>
+    <li><a href="privacy.html">Privacy policy</a></li>
+    <li><a href="terms.html">Terms of service</a></li>
+  </ul>
+
+  <footer>
+    NeuroClips uses YouTube API Services.
+    See the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>
+    and the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.
+  </footer>
+</main>
+</body>
+</html>

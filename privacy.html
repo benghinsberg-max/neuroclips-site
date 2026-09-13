@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeuroClips &mdash; Privacy Policy</title>
+<style>
+  :root { --ink:#16181d; --dim:#5b6270; --line:#e3e6ec; --bg:#fbfbfd; --link:#2a5bd7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink:#e8eaf0; --dim:#9aa2b1; --line:#2a2e38; --bg:#14161b; --link:#7ea3ff; }
+  }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:3rem 1.25rem 5rem; }
+  h1 { font-size:1.7rem; margin:0 0 .3rem; letter-spacing:-.02em; }
+  .sub { color:var(--dim); margin:0 0 2.5rem; font-size:.92rem; }
+  h2 { font-size:1.05rem; margin:2.25rem 0 .6rem; }
+  a { color:var(--link); }
+  ul { padding-left:1.1rem; }
+  li { margin:.35rem 0; }
+  footer { margin-top:3rem; padding-top:1.25rem; border-top:1px solid var(--line);
+           color:var(--dim); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Privacy Policy</h1>
+  <p class="sub">NeuroClips &middot; last updated 13 September 2026 &middot;
+     <a href="index.html">home</a></p>
+
+  <h2>Summary</h2>
+  <p>NeuroClips is a personal, self-hosted tool with exactly one user: the person
+     who installed it. It collects no data from anyone else, has no visitors, no
+     sign-ups and no analytics. This policy exists because Google requires one
+     from applications that use the YouTube API.</p>
+
+  <h2>What the application accesses</h2>
+  <p>With the operator&rsquo;s explicit consent through Google&rsquo;s own sign-in
+     screen, NeuroClips requests:</p>
+  <ul>
+    <li><code>youtube.upload</code> &mdash; to upload videos to the
+        operator&rsquo;s own channel</li>
+    <li><code>youtube.readonly</code> &mdash; to read that channel&rsquo;s video
+        list, so the same video is not uploaded twice</li>
+    <li><code>yt-analytics.readonly</code> and
+        <code>yt-analytics-monetary.readonly</code> &mdash; to read that
+        channel&rsquo;s own view counts and estimated revenue, shown privately to
+        the operator</li>
+  </ul>
+  <p>It requests nothing else and can reach no account other than the one that
+     authorised it.</p>
+
+  <h2>What is stored, and where</h2>
+  <ul>
+    <li><strong>The OAuth token</strong> is stored on the operator&rsquo;s own
+        computer in a file readable only by them, and as an encrypted GitHub
+        Actions secret used to run the uploads. It is never displayed, logged or
+        transmitted anywhere except to Google.</li>
+    <li><strong>Video records</strong> &mdash; titles, upload dates, YouTube video
+        IDs, view counts and estimated earnings for the operator&rsquo;s own
+        channel &mdash; are stored in a local database file, kept in a private
+        repository.</li>
+    <li><strong>Nothing else.</strong> No personal data about any other person is
+        collected, processed or stored.</li>
+  </ul>
+
+  <h2>Who the data is shared with</h2>
+  <p>No one. Data is not sold, rented, published, or disclosed to third parties.
+     It is not used for advertising, and it is not used to train machine-learning
+     models. The only outbound transfers are the API calls to Google that the
+     application exists to make.</p>
+
+  <h2>Limited use</h2>
+  <p>NeuroClips&rsquo; use of information received from Google APIs adheres to the
+     <a href="https://developers.google.com/terms/api-services-user-data-policy">Google
+     API Services User Data Policy</a>, including its Limited Use requirements.</p>
+
+  <h2>Retention and deletion</h2>
+  <p>The operator can revoke the application&rsquo;s access at any time at
+     <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>,
+     which immediately ends all access. Local copies are removed by deleting the
+     application&rsquo;s folder; there is no server-side copy to request the
+     deletion of.</p>
+
+  <h2>Children</h2>
+  <p>The application is not directed at children and has no users other than its
+     operator.</p>
+
+  <h2>Changes</h2>
+  <p>Any change to this policy will be published on this page with a new date
+     above.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy: <a href="mailto:ben.ghinsberg2@gmail.com">ben.ghinsberg2@gmail.com</a></p>
+
+  <footer>
+    NeuroClips uses YouTube API Services.
+    See the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>
+    and the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.
+  </footer>
+</main>
+</body>
+</html>
